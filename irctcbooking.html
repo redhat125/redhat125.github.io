@@ -34,8 +34,14 @@
         var user =  GetURLParameter('name');
         var pnr = GetURLParameter('pnr');
         
-        
+        if(user == 'undefined'){
+            user = "there";
+        }
         $("#user").text(" "+user);
+        
+        if(pnr == 'undefined'){
+            pnr = "missing";
+        }
         $("#pnrnumber").text(pnr);
     });
 
