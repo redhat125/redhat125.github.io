@@ -7,13 +7,10 @@
     
     <div class="container">
       <div class="jumbotron">
-        <h2>Hi there...</h2>      
+          <h2>Hi<span id="user"></span>...</h2>      
         <p> Your PNR number is <sapn style="color:#f44336" id="pnrnumber"></sapn></p>
       </div>    
     </div>
-
-<h1 id="pnrnumber"></h1>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
@@ -34,8 +31,12 @@
                 }
             }
             
-            var pnr = GetURLParameter('pnr');
-            $("#pnrnumber").text(pnr);
+        var user =  GetURLParameter('name');
+        var pnr = GetURLParameter('pnr');
+        
+        
+        $("#user").text(user);
+        $("#pnrnumber").text(pnr);
     });
 
 </script>
