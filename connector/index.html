@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #drawContainer {
+        height: 1000px;
+        width: 80%;
+        background-color: rgb(227, 249, 241);
+        display: inline-block;
+        }
+        #shapeContainer {
+        height: 1000px;
+        width: 20%;
+        background-color: rgb(170, 247, 219);
+        display: inline-block;
+        position:absolute;
+        top:0;
+        }
+        .shapeBox{
+            width: 100px;
+            height: 100px;
+            background:rgb(58, 185, 64); 
+            position:absolute;
+            text-align: center;
+        }
+        .shapeBox:hover{
+            width: 103px;
+            height: 103px;
+            background:rgb(0, 255, 13);
+            cursor:grab;
+        }
+        .shapeName{
+            position:relative;
+            background:rgb(17, 255, 255);
+            text-align: center;
+            cursor: pointer;
+        }
+        .noDrag{
+            position:absolute;
+            width: 20px;
+            height: 20px;
+            background:rgb(255, 0, 0);
+            border-radius: 50%;
+        }
+        .circleRight{
+            margin: 25px 0px 40px 90px;
+        }
+        .circleLeft{
+            margin: 25px 0px 40px -10px; 
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  
+</head>
+<body style="padding:0px; margin:0px">
+
+<div id="drawContainer">
+        
+        <svg id="svgliner" width="1" height="1" style="height:100%; width:100%"></svg>
+</div>
+<div id="shapeContainer">
+        <div id="shapeName1" class="shapeName"><p>Div1</p></div>
+        <div id="shapeName2" class="shapeName"><p>Div2</p></div>
+        <div id="shapeName3" class="shapeName"><p>Div3</p></div>
+</div>
+
+<script>
+    shapeBoxDrag();
+        var connectedShapes = [];
+
+        var svgliner = $("#svgliner");
+        var drawContainer = $("#drawContainer");
+        var isMouseDown = false;
+        var lineStartX = 0;
+        var LineStartY = 0;
+        var lineCounter = 0;
+        var lineId;
+        var lineElem;
+        var startCircle;
+        var endCircle;
+        var shapeBoxIndex = 0;
+        var dropActive = false;
+        var activeShapeId;
+        var activeShapeName;
+
+
+        $("body").on("mousedown", ".noDrag.circleRight", function(event){
+            isMouseDown = true;
+            startCircle = $(this).attr("id");
+
+            lineElem = document.createElementNS('http://www.w3.org/2000/svg','line');
+            lineElem.setAttribute('stroke',"black");
+            svgliner.append(lineElem); 
+            
+            var pOffset = svgliner.offset();
+            lineStartX = event.clientX - pOffset.left,
+            LineStartY = event.clientY - pOffset.top;
+        })
+
+        $("body").on("mouseup", ".noDrag.circleLeft", function(){
+            isMouseDown = false;
+            lineCounter = lineCounter+1;
+            endCircle = $(this).attr("id");
+            // create line id
+            lineId = startCircle+"-"+endCircle+"-"+"line"+lineCounter;
+            lineElem.setAttribute('id',lineId);
+            updateConnectedShape(lineId);
+            console.log("isMouseDown:"+isMouseDown +" on line joined with id:"+lineId);
+        })
+
+        svgliner.on("mousemove", function(event){
+        if(isMouseDown){
+            var pOffset = svgliner.offset(),
+            px = event.clientX - pOffset.left,
+            py = event.clientY - pOffset.top;
+
+            lineElem.setAttribute('x1',lineStartX);
+            lineElem.setAttribute('x2',px);
+            lineElem.setAttribute('y1',LineStartY);
+            lineElem.setAttribute('y2',py);
+        }
+        });
+
+        function shapeBoxDrag() {
+            $( ".shapeBox" ).draggable({
+                cancel: '.noDrag',
+                drag: function(event, ui) {
+                    if(lineElem !== undefined){
+                        var shapeId = $(this).attr("id");
+
+                        var incomingCircle = $("#"+shapeId+"CircleLeft").offset();
+                        var outgoingCircle = $("#"+shapeId+"CircleRight").offset();
+
+                        var pOffset = svgliner.offset();
+                        var incomingPx = (incomingCircle.left - pOffset.left) + 10;
+                        var incomingPy = (incomingCircle.top - pOffset.top) + 10;
+
+                        var outgoingPx = (outgoingCircle.left - pOffset.left) + 10;
+                        var outgoingPy = (outgoingCircle.top - pOffset.top) + 10;
+
+
+
+                        connectedShapes.forEach((shapeInfo)=>{
+                            if(shapeInfo.id == shapeId){
+                                var incomingLines = shapeInfo.incoming;
+                                var outgoingLines = shapeInfo.outgoing;
+
+                                incomingLines.forEach((lineId)=>{
+                                    $("#"+lineId).attr('x2',incomingPx);
+                                    $("#"+lineId).attr('y2',incomingPy);
+                                });
+
+                                outgoingLines.forEach((lineId)=>{
+                                    $("#"+lineId).attr('x1',outgoingPx);
+                                    $("#"+lineId).attr('y1',outgoingPy);
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function updateConnectedShape(lineId){
+            var startShape = lineId.split("CircleRight")[0];
+            var endShape = lineId.split("-")[1].split("CircleLeft")[0];
+
+            connectedShapes.forEach((shapeInfo)=>{
+                if(shapeInfo.id == startShape){
+                    shapeInfo.outgoing.push(lineId);
+                }
+                if(shapeInfo.id == endShape){
+                    shapeInfo.incoming.push(lineId);
+                }
+            });
+            console.log("ConnectedShape :"+JSON.stringify(connectedShapes));
+        }
+
+
+
+        $(".shapeName").on("click", function(event){
+            dropActive = true;
+            activeShapeId = $(this).attr("id");
+            activeShapeName = $(this).find( "p" ).text();
+            //console.log("clicked id:"+ activeShapeId + " val:"+activeShapeName);
+        });
+
+        $("#drawContainer").on("click", function(event){
+            if(dropActive){
+                var boxX = event.clientX-50;
+                var boxY = event.clientY-50;
+
+                shapeBoxIndex = shapeBoxIndex+1;
+                var boxId = "shapeBox"+shapeBoxIndex;
+
+                var boxElement = '<div id="'+boxId+'" class="shapeBox" style="top:'+boxY+'px; left:'+boxX+'px;">'+
+                                    activeShapeName+
+                                    '<div id="'+boxId+'CircleRight" class="noDrag circleRight"></div>'+
+                                    '<div id="'+boxId+'CircleLeft" class="noDrag circleLeft"></div>'+
+                                '</div>';
+
+                drawContainer.append(boxElement); 
+                var shapeInfo = {
+                    id: boxId,
+                    incoming:[],
+                    outgoing:[]
+                };
+                connectedShapes.push(shapeInfo);
+
+                shapeBoxDrag();
+            }
+            dropActive = false;
+        });
+
+
+    </script>
+
+</body>
+</html>
+
+
