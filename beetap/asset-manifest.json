@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/beetap/static/css/main.e9035223.css",
+    "main.js": "/beetap/static/js/main.68fb5d14.js",
+    "static/js/453.a03594cd.chunk.js": "/beetap/static/js/453.a03594cd.chunk.js",
+    "index.html": "/beetap/index.html",
+    "main.e9035223.css.map": "/beetap/static/css/main.e9035223.css.map",
+    "main.68fb5d14.js.map": "/beetap/static/js/main.68fb5d14.js.map",
+    "453.a03594cd.chunk.js.map": "/beetap/static/js/453.a03594cd.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e9035223.css",
+    "static/js/main.68fb5d14.js"
+  ]
+}
